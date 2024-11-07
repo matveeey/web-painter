@@ -1,0 +1,11 @@
+fastapi[all]
+requests
+httpx
+pydantic
+schedule
+os
+time
+jwt
+asyncio
+aiohttp
+websockets
