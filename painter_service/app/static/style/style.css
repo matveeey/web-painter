@@ -103,3 +103,24 @@ canvas { display: block; }
     text-shadow: 1px 1px #ffffff;
     margin-right: 10px;
 }
+
+.credits {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(29, 29, 29, 0.5);
+    text-shadow: 1px 1px #0a0a0a;
+    font-size: 0.5rem;
+    text-align: center;
+    z-index: 2;
+}
+
+.credits a {
+    color: rgba(44, 44, 44, 0.7);
+    text-decoration: none;
+}
+
+.credits a:hover {
+    text-decoration: underline;
+}
