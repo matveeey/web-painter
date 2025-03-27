@@ -11,6 +11,9 @@ export class SceneController {
             '/painter/static/3d/meshes/simple-stone/textures/Material_108_baseColor.jpeg',
             '/painter/static/3d/meshes/simple-stone/scene.gltf'
         );
+        this.model.loadCanvasMesh(
+            '/painter/static/3d/meshes/simple-stone/scene.gltf'
+        );
         this.model.animate();
     }
 }

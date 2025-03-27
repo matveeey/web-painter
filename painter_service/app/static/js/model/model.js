@@ -1,4 +1,5 @@
 import { loadMesh } from '../utils/meshLoader.js';
+import { loadCanvasMesh } from '../utils/meshLoader.js';
 
 const defaultCamDistance = 300
 const maxCamDistance = 5000
@@ -20,12 +21,33 @@ export class SceneModel {
         this.isZooming = false;
         this.initialDistance = 0;
         this.initialCameraZ = this.camera.position.z;
+
+
+        // Создание линии для визуализации луча рейкастера
+        this.raycasterLine = new THREE.Line(
+            new THREE.BufferGeometry(),
+            new THREE.LineBasicMaterial({ color: 0xff0000 })
+        );
+        this.raycasterLine.visible = false;
+        this.scene.add(this.raycasterLine);
     }
 
     loadMeshAndTexture(texturePath, meshPath) {
         loadMesh(this.scene, texturePath, meshPath, (mesh) => {
             this.loadedMesh = mesh;
             this.camera.position.z = defaultCamDistance;
+        });
+    }
+
+    loadCanvasMesh(meshPath) {
+        loadCanvasMesh(this.scene, meshPath, (mesh, texture) => {
+            this.canvasMesh = mesh;
+            this.canvasTexture = texture;
+            this.canvasMesh.traverse((child) => {
+                if (child.isMesh) {
+                    console.log('Mesh position:', child.position);
+                }
+            });
         });
     }
 
@@ -74,16 +96,42 @@ export class SceneModel {
             );
             raycaster.setFromCamera(mouse, this.camera);
             const intersects = raycaster.intersectObjects(this.scene.children);
+
+            // Визуализация луча рейкастера
+            let origin = new THREE.Vector3();
+            let direction = new THREE.Vector3();
+            // raycaster.ray.origin.toArray(origin.toArray());
+            // raycaster.ray.direction.multiplyScalar(1000).toArray(direction.toArray());
+
+            origin = raycaster.ray.origin;
+            direction = raycaster.ray.direction;
+
+            this.raycasterLine.geometry.setFromPoints([origin, direction]);
+            this.raycasterLine.visible = true;
+            console.log('this.scene.children:', this.scene.children);
             if (intersects.length > 0) {
-                const uv = intersects[0].uv;
-                const material = intersects[0].object.material;
-                const canvas = material.map.image;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = this.currentColor;
-                ctx.beginPath();
-                ctx.arc(uv.x * canvas.width, (1 - uv.y) * canvas.height, 5, 0, Math.PI * 2);
-                ctx.fill();
-                material.map.needsUpdate = true;
+                console.log('intersecting'); // Логирование для отладки
+                // const uv = intersects[0].uv;
+                // const material = intersects[0].object.material;
+                // const canvas = material.map.image;
+                // const ctx = canvas.getContext('2d');
+                // ctx.fillStyle = this.currentColor;
+                // ctx.beginPath();
+                // ctx.arc(uv.x * canvas.width, (1 - uv.y) * canvas.height, 5, 0, Math.PI * 2);
+                // ctx.fill();
+                // material.map.needsUpdate = true;
+                const intersect = intersects[0];
+                if (intersect.object === this.canvasMesh) {
+                    console.log('brushing'); // Логирование для отладки
+                    const uv = intersect.uv;
+                    const canvas = this.canvasTexture.image;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = this.currentColor;
+                    ctx.beginPath();
+                    ctx.arc(uv.x * canvas.width, (1 - uv.y) * canvas.height, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    this.canvasTexture.needsUpdate = true;
+                }
             }
         }
 
